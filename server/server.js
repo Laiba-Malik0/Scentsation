@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import cors from "cors"; // <-- Dobara import karlein standard cors package
 import path from "path";
 import fs from "fs";
 
@@ -18,29 +19,16 @@ connectDB();
 const app = express();
 
 // =======================
-// CUSTOM CORS HEADERS (Forced Middleware)
+// STANDARD CORS CONFIG (Vercel-Optimized)
 // =======================
-app.use((req, res, next) => {
-  const allowedOrigins = [
-    "https://scentsation-26ai.vercel.app", // Aapka live frontend link
-    "http://localhost:5173"                // Local testing ke liye
-  ];
-  const origin = req.headers.origin;
+const corsOptions = {
+  origin: "https://scentsation-26ai.vercel.app",
+  credentials: true,
+  optionsSuccessStatus: 204 // Kuch browsers (purane) 204 status mangte hain preflight ke liye
+};
 
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-
-  // Agar browser preflight OPTIONS request bhejta hai, to yahi se response return karein
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Har route par preflight request enable karein
 
 app.use(express.json());
 
