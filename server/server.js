@@ -20,7 +20,15 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://scentsation-3ci6.vercel.app",
+      "http://localhost:5173"
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // =======================
