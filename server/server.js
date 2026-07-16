@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import cors from "cors";
 import path from "path";
 import fs from "fs";
 
@@ -19,18 +18,30 @@ connectDB();
 const app = express();
 
 // =======================
-// CORS
+// CUSTOM CORS HEADERS (Forced Middleware)
 // =======================
-app.use(
-  cors({
-    origin: [
-      "https://scentsation-26ai.vercel.app", // Aapka live frontend link
-      "http://localhost:5173"                // Local testing ke liye (agar React/Vite hai)
-    ],
-    credentials: true,
-  })
-);
-app.options("*", cors());
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    "https://scentsation-26ai.vercel.app", // Aapka live frontend link
+    "http://localhost:5173"                // Local testing ke liye
+  ];
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  // Agar browser preflight OPTIONS request bhejta hai, to yahi se response return karein
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.json());
 
 // =======================
