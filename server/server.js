@@ -14,7 +14,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
-console.log("Stripe Key:", process.env.STRIPE_SECRET_KEY);
+// console.log("Stripe Key:", process.env.STRIPE_SECRET_KEY);
 
 connectDB();
 
