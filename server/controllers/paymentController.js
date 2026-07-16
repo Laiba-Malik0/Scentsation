@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("Stripe Key:", process.env.STRIPE_SECRET_KEY);
+// console.log("Stripe Key:", process.env.STRIPE_SECRET_KEY);
 
 import Stripe from "stripe";
 
