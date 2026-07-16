@@ -31,9 +31,9 @@ export const createProduct = async (req, res) => {
 
     let imageUrl = "";
 
-    if (req.file) {
-      imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
-    }
+   if (req.file) {
+  imageUrl = req.file.path;
+}
 
     const product = await Product.create({
       name,
@@ -77,11 +77,9 @@ export const updateProduct = async (req, res) => {
       req.body.category || product.category;
     product.countInStock =
       req.body.countInStock || product.countInStock;
-
-    if (req.file) {
-      product.imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
-    }
-
+if (req.file) {
+  product.imageUrl = req.file.path;
+}
     const updated = await product.save();
 
     res.status(200).json(updated);

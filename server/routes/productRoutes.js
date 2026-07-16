@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../config/cloudinary.js";
 
 import {
   getProducts,
@@ -12,19 +13,14 @@ import {
 const router = express.Router();
 
 // =======================
-// Multer Configuration
+// Cloudinary Storage
 // =======================
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      Date.now() + path.extname(file.originalname)
-    );
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "scentsation-products",
+    allowed_formats: ["jpg", "jpeg", "png", "webp", "avif"],
   },
 });
 
@@ -34,24 +30,12 @@ const upload = multer({ storage });
 // Routes
 // =======================
 
-// Get All Products
 router.get("/", getProducts);
 
-// Add Product
-router.post(
-  "/",
-  upload.single("image"),
-  createProduct
-);
+router.post("/", upload.single("image"), createProduct);
 
-// Update Product
-router.put(
-  "/:id",
-  upload.single("image"),
-  updateProduct
-);
+router.put("/:id", upload.single("image"), updateProduct);
 
-// Delete Product
 router.delete("/:id", deleteProduct);
 
 export default router;
