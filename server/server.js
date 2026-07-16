@@ -23,11 +23,13 @@ const app = express();
 // =======================
 app.use(
   cors({
-    origin: true,
+    origin: [
+      "https://scentsation-26ai.vercel.app", // Aapka live frontend link
+      "http://localhost:5173"                // Local testing ke liye (agar React/Vite hai)
+    ],
     credentials: true,
   })
 );
-
 app.use(express.json());
 
 // =======================
