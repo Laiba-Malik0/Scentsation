@@ -14,29 +14,27 @@ import adminRoutes from "./routes/adminRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
-// console.log("Stripe Key:", process.env.STRIPE_SECRET_KEY);
-
 connectDB();
 
 const app = express();
 
+// =======================
+// CORS
+// =======================
 app.use(
   cors({
-    origin: [
-      "https://scentsation-26ai.vercel.app",
-      "http://localhost:5173",
-    ],
+    origin: true,
     credentials: true,
   })
 );
+
 app.use(express.json());
 
 // =======================
-// Upload Folder (Vercel Friendly)
+// Upload Folder
 // =======================
 const uploadDir = path.join(process.cwd(), "uploads");
 
-// Sirf tabhi folder banayein jab hum local computer par chal rahe hon
 if (process.env.NODE_ENV !== "production") {
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
@@ -55,23 +53,21 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/orders", orderRoutes);
 
 // =======================
-// Home Route
+// Home
 // =======================
 app.get("/", (req, res) => {
   res.send("Scentsasia API Running...");
 });
 
 // =======================
-// Server (Vercel Compatibility)
+// Server
 // =======================
 const PORT = process.env.PORT || 5000;
 
-// Vercel par app.listen nahi chalna chahiye, sirf local development me chalega
 if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on Port ${PORT}`);
   });
 }
-// test change
-// Vercel ko batane ke liye ke ye main express app hai
+
 export default app;
