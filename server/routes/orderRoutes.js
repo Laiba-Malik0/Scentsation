@@ -1,14 +1,12 @@
 import express from "express";
-import {
-  createOrder,
-  createStripeSession,
-  getOrders,
-} from "../controllers/orderController.js";
+import { createOrder, getOrders } from "../controllers/orderController.js";
 
 const router = express.Router();
 
+// Order creation route
 router.post("/", createOrder);
+
+// Get all orders route
 router.get("/", getOrders);
-router.post("/stripe-checkout", createStripeSession);
 
 export default router;
