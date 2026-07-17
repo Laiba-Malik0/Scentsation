@@ -73,8 +73,7 @@ const ProductCard = ({
       <div className="relative overflow-hidden">
 
         <img
-          src={product.image}
-          alt={product.name}
+src={product.imageUrl}          alt={product.name}
           className="h-52 sm:h-56 w-full object-cover group-hover:scale-110 duration-500"
         />
 
@@ -87,8 +86,7 @@ const ProductCard = ({
         </button>
 
         <span className="absolute top-3 left-3 bg-[#C9A96E] text-white text-[10px] sm:text-xs px-3 py-1 rounded-full uppercase">
-          {product.gender}
-        </span>
+{product.category}        </span>
 
       </div>
 
