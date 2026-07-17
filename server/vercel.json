@@ -6,6 +6,9 @@
       "use": "@vercel/node"
     }
   ],
+  "deploymentProtection": {
+    "status": "disabled"
+  },
   "routes": [
     {
       "src": "/(.*)",
