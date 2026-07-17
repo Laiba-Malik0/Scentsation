@@ -6,7 +6,6 @@ import Product from "../models/Product.js";
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
-
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({
@@ -31,10 +30,13 @@ export const createProduct = async (req, res) => {
 
     let imageUrl = "";
 
-   if (req.file) {
-  imageUrl = req.file.path;
-}
+    if (req.file) {
+      // Kyunki router me 'multer-storage-cloudinary' setup hai, 
+      // req.file.path me direct Cloudinary ka live web URL mil jayega!
+      imageUrl = req.file.path; 
+    }
 
+    // Dono fields (imageUrl aur image) save kar rahe hain taake frontend break na ho
     const product = await Product.create({
       name,
       brand,
@@ -43,6 +45,7 @@ export const createProduct = async (req, res) => {
       category,
       countInStock,
       imageUrl,
+      image: imageUrl, 
     });
 
     res.status(201).json(product);
@@ -59,7 +62,6 @@ export const createProduct = async (req, res) => {
 // =======================
 export const updateProduct = async (req, res) => {
   try {
-
     const product = await Product.findById(req.params.id);
 
     if (!product) {
@@ -71,17 +73,17 @@ export const updateProduct = async (req, res) => {
     product.name = req.body.name || product.name;
     product.brand = req.body.brand || product.brand;
     product.price = req.body.price || product.price;
-    product.description =
-      req.body.description || product.description;
-    product.category =
-      req.body.category || product.category;
-    product.countInStock =
-      req.body.countInStock || product.countInStock;
-if (req.file) {
-  product.imageUrl = req.file.path;
-}
-    const updated = await product.save();
+    product.description = req.body.description || product.description;
+    product.category = req.body.category || product.category;
+    product.countInStock = req.body.countInStock || product.countInStock;
 
+    if (req.file) {
+      // Nayi image automatic Cloudinary par upload ho chuki hai, bas url update karein
+      product.imageUrl = req.file.path;
+      product.image = req.file.path;
+    }
+
+    const updated = await product.save();
     res.status(200).json(updated);
 
   } catch (error) {
@@ -96,7 +98,6 @@ if (req.file) {
 // =======================
 export const deleteProduct = async (req, res) => {
   try {
-
     const product = await Product.findById(req.params.id);
 
     if (!product) {

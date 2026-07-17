@@ -2,10 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import cors from "cors"; // <-- Dobara import karlein standard cors package
-import path from "path";
-import fs from "fs";
-
+import cors from "cors";
 import connectDB from "./config/db.js";
 
 import productRoutes from "./routes/productRoutes.js";
@@ -14,6 +11,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
+// Database Connect
 connectDB();
 
 const app = express();
@@ -24,26 +22,16 @@ const app = express();
 const corsOptions = {
   origin: "https://scentsation-26ai.vercel.app",
   credentials: true,
-  optionsSuccessStatus: 204 // Kuch browsers (purane) 204 status mangte hain preflight ke liye
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Har route par preflight request enable karein
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
-// =======================
-// Upload Folder
-// =======================
-const uploadDir = path.join(process.cwd(), "uploads");
-
-if (process.env.NODE_ENV !== "production") {
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-  }
-}
-
-app.use("/uploads", express.static(uploadDir));
+// Note: Local "uploads" folder static serving ko remove kar diya hai,
+// kyunki hamari saari images ab Cloudinary ke live CDN links se load hongi!
 
 // =======================
 // Routes
@@ -58,18 +46,18 @@ app.use("/api/orders", orderRoutes);
 // Home
 // =======================
 app.get("/", (req, res) => {
-  res.send("Scentsasia API Running...");
+  res.send("Scentsasia API Running on Cloudinary Cloud Storage...");
 });
 
 // =======================
-// Server
+// Server Listen
 // =======================
 const PORT = process.env.PORT || 5000;
 
-if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on Port ${PORT}`);
-  });
-}
+// Local testing aur standard cloud hosting ke liye server listen zaroori hai.
+// Vercel serverless functions handle karne ke liye is export ko automatic use karega.
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on Port ${PORT}`);
+});
 
 export default app;

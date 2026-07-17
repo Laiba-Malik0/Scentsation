@@ -1,38 +1,13 @@
-import User from "../models/User.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import Product from "../models/Product.js";
+import { v2 as cloudinary } from "cloudinary"; // Cloudinary import kiya
 
-// ==========================
-// Register User
-// ==========================
-export const registerUser = async (req, res) => {
+// =======================
+// Get All Products
+// =======================
+export const getProducts = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-
-    const userExists = await User.findOne({ email });
-
-    if (userExists) {
-      return res.status(400).json({
-        message: "User already exists",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
-
-    res.status(201).json({
-      message: "Registration Successful",
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-      },
-    });
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -40,72 +15,112 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// ==========================
-// Login User
-// ==========================
-export const loginUser = async (req, res) => {
+// =======================
+// Create Product
+// =======================
+export const createProduct = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const {
+      name,
+      brand,
+      price,
+      description,
+      category,
+      countInStock,
+    } = req.body;
 
-    // ===== ADMIN LOGIN =====
-    if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
-      const token = jwt.sign(
-        {
-          email,
-          isAdmin: true,
-        },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: "7d",
-        }
-      );
+    let imageUrl = "";
 
-      return res.json({
-        token,
-        isAdmin: true,
+    // Agar user ne local system se image send ki hai
+    if (req.file) {
+      // Image ko direct Cloudinary par upload kar rahe hain
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "scentsation_products", // Cloudinary par is folder me save hoga
+      });
+      
+      // Cloudinary se mila hua secure HTTPS web link url me save karein
+      imageUrl = result.secure_url; 
+    }
+
+    // Kuch frontends par image schema me 'image' field hoti hai aur kuch me 'imageUrl'
+    // Hum safe side rehne ke liye dono keys ko database me create karte hain taake frontend broken na ho!
+    const product = await Product.create({
+      name,
+      brand,
+      price,
+      description,
+      category,
+      countInStock,
+      imageUrl, // Purana field standard
+      image: imageUrl, // Frontend safety ke liye direct 'image' field bhi populate kar rahe hain
+    });
+
+    res.status(201).json(product);
+
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+// =======================
+// Update Product
+// =======================
+export const updateProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product Not Found",
       });
     }
 
-    // ===== USER LOGIN =====
-    const user = await User.findOne({ email });
+    product.name = req.body.name || product.name;
+    product.brand = req.body.brand || product.brand;
+    product.price = req.body.price || product.price;
+    product.description = req.body.description || product.description;
+    product.category = req.body.category || product.category;
+    product.countInStock = req.body.countInStock || product.countInStock;
 
-    if (!user) {
-      return res.status(400).json({
-        message: "Invalid Email",
+    if (req.file) {
+      // Agar update karte waqt nayi image aayi hai to use bhi Cloudinary par upload karenge
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "scentsation_products",
+      });
+      
+      product.imageUrl = result.secure_url;
+      product.image = result.secure_url; // Dono fields update karenge
+    }
+
+    const updated = await product.save();
+    res.status(200).json(updated);
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// =======================
+// Delete Product
+// =======================
+export const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product Not Found",
       });
     }
 
-    const match = await bcrypt.compare(
-      password,
-      user.password
-    );
+    await product.deleteOne();
 
-    if (!match) {
-      return res.status(400).json({
-        message: "Invalid Password",
-      });
-    }
-
-    const token = jwt.sign(
-      {
-        id: user._id,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
-
-    // Password remove before sending
-    const { password: userPassword, ...userData } = user._doc;
-
-    res.json({
-      token,
-      user: userData,
-      isAdmin: false,
+    res.status(200).json({
+      message: "Product Deleted Successfully",
     });
 
   } catch (error) {
