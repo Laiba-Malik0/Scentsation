@@ -31,12 +31,10 @@ export const createProduct = async (req, res) => {
     let imageUrl = "";
 
     if (req.file) {
-      // Kyunki router me 'multer-storage-cloudinary' setup hai, 
-      // req.file.path me direct Cloudinary ka live web URL mil jayega!
+      // Multer-storage-cloudinary automatic upload kar ke link path me de deta hai
       imageUrl = req.file.path; 
     }
 
-    // Dono fields (imageUrl aur image) save kar rahe hain taake frontend break na ho
     const product = await Product.create({
       name,
       brand,
@@ -78,7 +76,6 @@ export const updateProduct = async (req, res) => {
     product.countInStock = req.body.countInStock || product.countInStock;
 
     if (req.file) {
-      // Nayi image automatic Cloudinary par upload ho chuki hai, bas url update karein
       product.imageUrl = req.file.path;
       product.image = req.file.path;
     }
