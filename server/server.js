@@ -17,21 +17,48 @@ connectDB();
 const app = express();
 
 // =======================
-// STANDARD CORS CONFIG (Vercel-Optimized)
+// IMPROVED CORS CONFIG (Vercel-Friendly)
 // =======================
+const allowedOrigins = [
+  "https://scentsation-26ai.vercel.app",
+  "https://scentsation-self.vercel.app", // Aapka backend URL (safety ke liye)
+  "http://localhost:5173",                 // Local testing ke liye
+];
+
 const corsOptions = {
-  origin: "https://scentsation-26ai.vercel.app",
+  origin: function (origin, callback) {
+    // Agar request same server se ho (no origin, e.g. Postman) ya allowed list me ho
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 204
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200 // Legacy browsers (IE11, etc.) ke liye 200 behtar hai 204 se
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+
+// Pre-flight requests (OPTIONS) ko handle karne ke liye middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.use(express.json());
-
-// Note: Local "uploads" folder static serving ko remove kar diya hai,
-// kyunki hamari saari images ab Cloudinary ke live CDN links se load hongi!
 
 // =======================
 // Routes
@@ -54,8 +81,6 @@ app.get("/", (req, res) => {
 // =======================
 const PORT = process.env.PORT || 5000;
 
-// Local testing aur standard cloud hosting ke liye server listen zaroori hai.
-// Vercel serverless functions handle karne ke liye is export ko automatic use karega.
 app.listen(PORT, () => {
   console.log(`🚀 Server running on Port ${PORT}`);
 });
