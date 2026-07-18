@@ -35,13 +35,19 @@ const Home = () => {
     try {
       const { data } = await api.get("/products");
 
-      const formattedProducts = data.map((item) => ({
-        ...item,
-        gender: item.category || item.tag?.split(",")[0] || "Unisex",
-        image: item.imageUrl || item.image,
-        brand: item.brand || "SCENTASIA",
-        description: item.description || item.notes,
-      }));
+      const formattedProducts=data.map(item=>({
+
+...item,
+
+image:item.imageUrl,
+
+brand:item.brand,
+
+description:item.description,
+
+gender:item.category
+
+}));
 
       setProducts(formattedProducts);
     } catch (error) {

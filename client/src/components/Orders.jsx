@@ -99,12 +99,11 @@ const Orders = () => {
                     className="flex items-center justify-between bg-gray-50 rounded-2xl p-4"
                   >
                     <div className="flex items-center gap-4">
-                      <img
-                        src={item.productId?.image}
-                        alt={item.productId?.name}
-                        className="w-20 h-20 rounded-xl object-cover border"
-                      />
-
+                     <img
+  src={item.productId?.imageUrl}
+  alt={item.productId?.name}
+  className="w-20 h-20 rounded-xl object-cover border"
+/>
                       <div>
                         <h4 className="font-semibold text-lg">
                           {item.productId?.name}

@@ -49,12 +49,20 @@ const CheckoutForm = ({ amount }) => {
 
       if (result.paymentIntent.status === "succeeded") {
 
-        const cart =
-          JSON.parse(localStorage.getItem("cart")) || [];
+       const cartData = localStorage.getItem("cart");
+const cart = cartData ? JSON.parse(cartData) : [];
 
-        const user =
-          JSON.parse(localStorage.getItem("user")) || {};
+const userData = localStorage.getItem("user");
 
+let user = {};
+
+if (
+  userData &&
+  userData !== "undefined" &&
+  userData !== "null"
+) {
+  user = JSON.parse(userData);
+}
         // Save Order
         await api.post("/orders", {
           customerName: user.name,
@@ -78,11 +86,11 @@ const CheckoutForm = ({ amount }) => {
       }
 
     } catch (error) {
-      console.log(error);
-      alert("Payment Failed");
-    } finally {
-      setLoading(false);
-    }
+  console.log(error);
+  console.log(error.response?.data);
+
+  alert(error.response?.data?.message || error.message);
+}
   };
 
   return (

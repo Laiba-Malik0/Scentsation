@@ -55,8 +55,17 @@ const AuthModal = ({ isOpen, onClose }) => {
       password: formData.password,
     });
 
-   localStorage.setItem("token", data.token);
-localStorage.setItem("user", JSON.stringify(data.user));
+localStorage.setItem("token", data.token);
+
+localStorage.setItem(
+  "user",
+  JSON.stringify({
+    _id: data._id,
+    name: data.name,
+    email: data.email,
+    isAdmin: data.isAdmin,
+  })
+);
 
 alert("Login Successful ✅");
 

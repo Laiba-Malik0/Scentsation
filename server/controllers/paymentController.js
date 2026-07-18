@@ -1,45 +1,28 @@
 import Stripe from "stripe";
 
-const stripe = new Stripe(
-  process.env.STRIPE_SECRET_KEY || "dummy_key_for_now"
-);
+console.log("Stripe Key:", process.env.STRIPE_SECRET_KEY);
 
-// ==============================
-// Stripe Checkout Session (makePayment)
-// POST /api/payment/create-checkout-session
-// ==============================
-export const makePayment = async (req, res, next) => {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+export const createPaymentIntent = async (req, res) => {
   try {
-    const { cartItems } = req.body;
+    const { amount } = req.body;
 
-    // FRONTEND_URL ko .env file se uthayenge, nahi to fallback localhost par hoga
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-
-    const lineItems = cartItems.map((item) => ({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: item.name,
-          images: [item.image],
-        },
-        unit_amount: Math.round(item.price * 100), // Decimal values se bachne ke liye Math.round zaroori hai
-      },
-      quantity: item.quantity || 1,
-    }));
-
-    const session = await stripe.checkout.sessions.create({
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Stripe paisa cents me leta hai
+      currency: "pkr",
       payment_method_types: ["card"],
-      line_items: lineItems,
-      mode: "payment",
-      success_url: `${frontendUrl}/order-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${frontendUrl}/cart`,
     });
 
     res.status(200).json({
-      id: session.id,
-      url: session.url,
+      clientSecret: paymentIntent.client_secret,
     });
+
   } catch (error) {
-    next(error);
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };

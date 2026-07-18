@@ -92,8 +92,11 @@ setEditId(null);
 
 if (clearEdit) clearEdit();
     } catch (error) {
-      console.log(error);
-      alert("Something Went Wrong");
+  console.log(error);
+  console.log(error.response?.data);
+
+  alert(error.response?.data?.message || "Something Went Wrong");
+
     } finally {
       setLoading(false);
     }

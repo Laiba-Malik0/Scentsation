@@ -19,6 +19,9 @@ export const getProducts = async (req, res) => {
 // =======================
 export const createProduct = async (req, res) => {
   try {
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
     const {
       name,
       brand,
@@ -31,8 +34,7 @@ export const createProduct = async (req, res) => {
     let imageUrl = "";
 
     if (req.file) {
-      // Multer-storage-cloudinary automatic upload kar ke link path me de deta hai
-      imageUrl = req.file.path; 
+      imageUrl = req.file.path;
     }
 
     const product = await Product.create({
@@ -43,12 +45,11 @@ export const createProduct = async (req, res) => {
       category,
       countInStock,
       imageUrl,
-      image: imageUrl, 
     });
 
     res.status(201).json(product);
-
   } catch (error) {
+    console.error("Create Product Error:", error);
     res.status(400).json({
       message: error.message,
     });
@@ -77,12 +78,11 @@ export const updateProduct = async (req, res) => {
 
     if (req.file) {
       product.imageUrl = req.file.path;
-      product.image = req.file.path;
     }
 
     const updated = await product.save();
-    res.status(200).json(updated);
 
+    res.status(200).json(updated);
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -108,7 +108,6 @@ export const deleteProduct = async (req, res) => {
     res.status(200).json({
       message: "Product Deleted Successfully",
     });
-
   } catch (error) {
     res.status(500).json({
       message: error.message,
