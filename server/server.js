@@ -12,32 +12,36 @@ import adminRoutes from "./routes/adminRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
+// Connect Database
 connectDB();
 
 const app = express();
 
+// CORS
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://scentsation-9hcm.vercel.app",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: true,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
+
+// Middleware
 app.use(express.json());
 
+// Routes
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/orders", orderRoutes);
 
+// Test Route
 app.get("/", (req, res) => {
   res.send("API Running...");
 });
 
+// Start Server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
